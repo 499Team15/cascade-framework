@@ -2,3 +2,4 @@
 
 #dont add large twitter data files
 data/Twitter*
+*__pycache__*

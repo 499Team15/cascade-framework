@@ -1,4 +1,6 @@
 import pandas as pd
+from lib.twitterdata import load_data
 
-data = pd.read_excel("data/ABCDCatering.xls")
-print("hello world")
+data = load_data()
+x = data.head()
+print(x)
