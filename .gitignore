@@ -1,1 +1,4 @@
 .ipynb_checkpoints
+
+#dont add large twitter data files
+data/Twitter*
