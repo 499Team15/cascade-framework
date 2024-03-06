@@ -1,0 +1,4 @@
+pandas 
+xlrd
+networkx
+matplotlib
