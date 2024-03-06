@@ -6,4 +6,6 @@ class Node:
   
   def get_value(self):
     return self.value
+
+  def get_time_stamp(self):
     return self.time_stamp
