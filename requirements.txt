@@ -1,4 +1,4 @@
-pandas 
-xlrd
-networkx
-matplotlib
+pandas==2.2.1
+xlrd==2.0.1
+networkx==3.2.1
+matplotlib==3.8.3
