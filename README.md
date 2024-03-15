@@ -37,33 +37,3 @@ pytest
 ```
 
 which will run all of the tests in the tests/ directory
-
-### The project structure
-
-my_project/
-├── src/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── data_processing.py
-│   │   └── helpers.py
-│   └── models/
-│       ├── __init__.py
-│       ├── model_a.py
-│       └── model_b.py
-├── tests/
-│   ├── __init__.py
-│   ├── test_data_processing.py
-│   └── test_models.py
-├── data/
-│   ├── raw/
-│   │   └── dataset.csv
-│   └── processed/
-│       └── cleaned_dataset.csv
-├── docs/
-│   ├── README.md
-│   └── api_documentation.md
-├── requirements.txt
-├── setup.py
-└── .gitignore
