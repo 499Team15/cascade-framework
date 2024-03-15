@@ -1,1 +1,0 @@
-Starter README for project
