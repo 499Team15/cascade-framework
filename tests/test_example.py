@@ -1,3 +1,10 @@
+from cascadef import node
+
+def test_node():
+    a = node.Node(3, time_stamp=10.0)
+    assert a.get_value() == 3
+    assert a.get_time_stamp() == 10.0
+
 def add(a, b):
     return a + b
 
