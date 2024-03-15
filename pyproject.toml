@@ -1,0 +1,15 @@
+[project]
+name = "cascadef"
+version = "0.1.0"
+description = "Modular library for taking data and producing a cascade"
+authors = [
+    {name = "atbarry", email = "albarry465@gmail.com"},
+]
+dependencies = []
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
