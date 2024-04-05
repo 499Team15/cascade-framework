@@ -1,14 +1,36 @@
-+ Can you extract a cascade from just a networkx graph? Assuming the timestamps are in the nodes
-+ What is he looking for in the interface?
+### Can you extract a cascade from just a networkx graph? Assuming the timestamps are in the nodes
 
-    Here is what we were thinking:
+No you need a series of events that happened on the graph as well.
 
-    + The user implements a function in the plugin interface called produce NetworkX graph or something.
-    + Then the interface comes with a function called produce cascade which takes in a networkx to produce a cascade
+For example if the graph is twitter users with edges being following one another, then one series of events could be tweets
+containing a certain hashtag. If a tweet contains the hashtag then an infection event is created for the graph.
 
-    Would this work?
+### Can you go over how to produce a cascade again?
 
-+ Can you go over how to produce a cascade again?
-+ We had an idea about querying databases, is this necessary for the project?
-+ Is there a specific type of data you want the data to be from? Or should it be up to the user?
-+ What are you looking for in the gui?
+**Cascade class**
+- Graph
+- array of vertex states in order by infection time
+    - Vertex states could be anything but for now focus on "infected" and "available?" <- forgot what magner called this one
+    - If possible store the actual time value in the vertex state
+
+### What is he looking for in the interface?
+
+**CascadeConstructor**
++ create_cascade(graph, timeseries) -> Cascade:
+
+### We had an idea about querying databases, is this necessary for the project?
+For now don't worry about it
+
+### Is there a specific type of data you want the data to be from? Or should it be up to the user?
+Abstract data handling class
+CascadeConstructor should not have to deal with data handling
+
+In our example we are using an excel file so we can possibly create a class to handle that
+
+### What are you looking for in the gui?
+A graph displaying the cascade
+
+He would like this to have a scroll bar of some sort which This bar should:
+- allows you to select the nodes that were infected during a given time period.
+- highlights the selected nodes on the graph
+- be extendable i.e. you should be able to change the width of the bar to select a larger or smaller range of time.
