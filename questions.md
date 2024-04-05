@@ -10,7 +10,7 @@ containing a certain hashtag. If a tweet contains the hashtag then an infection 
 **Cascade class**
 - Graph
 - array of vertex states in order by infection time
-    - Vertex states could be anything but for now focus on "infected" and "available?" <- forgot what magner called this one
+    - Vertex states could be anything but for now focus on "infected" and "available?" <- forgot what Magner called this one
     - If possible store the actual time value in the vertex state
 
 ### What is he looking for in the interface?
