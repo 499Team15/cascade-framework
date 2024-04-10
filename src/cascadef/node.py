@@ -12,6 +12,5 @@ class Node:
   def set_time_stamp(self, value, time_stamp): 
     self.time_stamp = time_stamp
 
-
   def set_value(self, value):
     self.value = value

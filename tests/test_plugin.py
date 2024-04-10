@@ -1,4 +1,4 @@
-from cascadef.plugin import Node
+from cascadef.node import Node
 import matplotlib.pyplot as plt
 import networkx as nx
 import datetime
@@ -9,9 +9,7 @@ def test_example_graph():
 
     user_1 = Node('User 1', ct)
 
-
     G = nx.DiGraph([('User 0','User 3' ), ('User 1', 'User 3'), ('User 2', 'User 4'), ('User 3', 'User 5'), ('User 3', 'User 6'), ('User 1', 'User 4'), ('User 5', 'User 6'), ('User 3' ,'User 4')])
-
 
     options = {
         "font_size": 12,
@@ -21,7 +19,6 @@ def test_example_graph():
         "linewidths": 5,
         "width": 5,
     }
-
 
     # group nodes by column
     left_nodes = ['User 0']
@@ -40,4 +37,4 @@ def test_example_graph():
     ax = plt.gca()
     ax.margins(0.20)
     plt.axis("off")
-    plt.show()
+    plt.savefig("output/example_graph.png")

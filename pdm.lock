@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default"]
 strategy = ["cross_platform"]
-lock_version = "4.4.1"
-content_hash = "sha256:ba4ee63e40d08f9aa1af8c5cd5941840cfdd4cea1771c9658411c13c685fa45f"
+lock_version = "4.4"
+content_hash = "sha256:83068742a8bb2a9547e9782c4e8fb34c2d19b2469bb5688965f7924a3409a7ee"
 
 [[package]]
 name = "colorama"
@@ -328,6 +328,50 @@ summary = "pyparsing module - Classes and methods to define and execute parsing 
 files = [
     {file = "pyparsing-3.1.2-py3-none-any.whl", hash = "sha256:f9db75911801ed778fe61bb643079ff86601aca99fcae6345aa67292038fb742"},
     {file = "pyparsing-3.1.2.tar.gz", hash = "sha256:a1bac0ce561155ecc3ed78ca94d3c9378656ad4c94c1270de543f621420f94ad"},
+]
+
+[[package]]
+name = "pyqt6"
+version = "6.6.1"
+requires_python = ">=3.6.1"
+summary = "Python bindings for the Qt cross platform application toolkit"
+dependencies = [
+    "PyQt6-Qt6>=6.6.0",
+    "PyQt6-sip<14,>=13.6",
+]
+files = [
+    {file = "PyQt6-6.6.1-cp38-abi3-macosx_10_14_universal2.whl", hash = "sha256:6b43878d0bbbcf8b7de165d305ec0cb87113c8930c92de748a11c473a6db5085"},
+    {file = "PyQt6-6.6.1-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:5aa0e833cb5a79b93813f8181d9f145517dd5a46f4374544bcd1e93a8beec537"},
+    {file = "PyQt6-6.6.1-cp38-abi3-win_amd64.whl", hash = "sha256:03a656d5dc5ac31b6a9ad200f7f4f7ef49fa00ad7ce7a991b9bb691617141d12"},
+    {file = "PyQt6-6.6.1.tar.gz", hash = "sha256:9f158aa29d205142c56f0f35d07784b8df0be28378d20a97bcda8bd64ffd0379"},
+]
+
+[[package]]
+name = "pyqt6-qt6"
+version = "6.6.3"
+summary = "The subset of a Qt installation needed by PyQt6."
+files = [
+    {file = "PyQt6_Qt6-6.6.3-py3-none-macosx_10_14_x86_64.whl", hash = "sha256:1674d161ea49a36e9146fd652e789d413a246cc2455ac8bf9c76902b4bd3b986"},
+    {file = "PyQt6_Qt6-6.6.3-py3-none-macosx_11_0_arm64.whl", hash = "sha256:18fe1fbbc709dcff5c513e3cac7b1d7b630fb189e6d32a1601f193d73d326f42"},
+    {file = "PyQt6_Qt6-6.6.3-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:6ae465dfcbb819dae5e18e8c96abba735b5bb2f16c066497dda4b7ca17c066ce"},
+    {file = "PyQt6_Qt6-6.6.3-py3-none-win_amd64.whl", hash = "sha256:dbe509eccc579f8818b2b2e8ba93e27986facdd1d4d83ef1c7d9bd47cdf32651"},
+]
+
+[[package]]
+name = "pyqt6-sip"
+version = "13.6.0"
+requires_python = ">=3.7"
+summary = "The sip module support for PyQt6"
+files = [
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:5b9c6b6f9cfccb48cbb78a59603145a698fb4ffd176764d7083e5bf47631d8df"},
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:86a7b67c64436e32bffa9c28c9f21bf14a9faa54991520b12c3f6f435f24df7f"},
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-win32.whl", hash = "sha256:58f68a48400e0b3d1ccb18090090299bad26e3aed7ccb7057c65887b79b8aeea"},
+    {file = "PyQt6_sip-13.6.0-cp311-cp311-win_amd64.whl", hash = "sha256:0dfd22cfedd87e96f9d51e0778ca2ba3dc0be83e424e9e0f98f6994d8d9c90f0"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:3bf03e130fbfd75c9c06e687b86ba375410c7a9e835e4e03285889e61dd4b0c4"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:43fb8551796030aae3d66d6e35e277494071ec6172cd182c9569ab7db268a2f5"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-win32.whl", hash = "sha256:13885361ca2cb2f5085d50359ba61b3fabd41b139fb58f37332acbe631ef2357"},
+    {file = "PyQt6_sip-13.6.0-cp312-cp312-win_amd64.whl", hash = "sha256:24441032a29791e82beb7dfd76878339058def0e97fdb7c1cea517f3a0e6e96b"},
+    {file = "PyQt6_sip-13.6.0.tar.gz", hash = "sha256:2486e1588071943d4f6657ba09096dc9fffd2322ad2c30041e78ea3f037b5778"},
 ]
 
 [[package]]
