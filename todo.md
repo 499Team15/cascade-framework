@@ -5,3 +5,7 @@ What we actually should do:
 - Implement a cascade using the interface
 - Work on visualization: stuff like adding a time slider on the chart
 - Make examples/tests to make sure everything works correctly
+
+John - facebook data
+Alex - cascade interface + examples
+Blake - example + visualization
