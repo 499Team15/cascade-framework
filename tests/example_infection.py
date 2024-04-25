@@ -1,6 +1,6 @@
 import networkx as nx
 import random
-from cascadef.cascade import CascadeConstructor, Cascade, VertexState
+from cascadef.cascade import CascadeConstructor, Cascade, InfectionEvent
 from cascadef.model import SIModel
 
 # Create a graph
@@ -57,7 +57,7 @@ class ExampleCascade(CascadeConstructor):
         for time, infected in enumerate(timeseries):
             for person in infected:
                 state = SIModel.INFECTED if time > 0 else SIModel.SUSCEPTIBLE
-                vertex_states.append(VertexState(person, state, time))
+                vertex_states.append(InfectionEvent(person, state, time))
         return Cascade(graph, vertex_states)
 
 cascade = ExampleCascade.create_cascade(graph, infected)

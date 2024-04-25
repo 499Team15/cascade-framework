@@ -34,7 +34,3 @@ He would like this to have a scroll bar of some sort which This bar should:
 - allows you to select the nodes that were infected during a given time period.
 - highlights the selected nodes on the graph
 - be extendable i.e. you should be able to change the width of the bar to select a larger or smaller range of time.
-
-### What timeseries take in again?
-
-### Is it feasible to have a generic way to pull data from social media?
