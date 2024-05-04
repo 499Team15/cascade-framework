@@ -21,11 +21,11 @@ class TestState(cascade.AbstractModelEnum):
 
 class TestCascadeConstructor(CascadeConstructor):
     def create_cascade(self, graph, timeseries) -> Cascade:
-        vertexstates = []
+        infection_events = []
         for node in timeseries:
-            vertexstates.append(InfectionEvent(node, SIModel.INFECTED, pd.Timestamp("2021-01-01")))
+            infection_events.append(InfectionEvent(node, SIModel.INFECTED, pd.Timestamp("2021-01-01")))
 
-        return Cascade(graph, vertexstates)
+        return Cascade(graph, infection_events)
 
 def test_abstract_state_enum():
     state = TestState.SUSCEPTIBLE
@@ -40,16 +40,22 @@ def test_vertex_state():
 
 def test_cascade_constructor():
     G = nx.Graph()
-    G.add_node(Node(1, None, "hi"))
-    G.add_node(Node(2, None, "other"))
-    G.add_node(Node(3, None, "something"))
+    G.add_node(Node(1, None, "hello world"))
+    G.add_node(Node(2, None, "i like cats"))
+    G.add_node(Node(3, None, "something else"))
     timeseries = [0, 2, 0]
     
     constructor = TestCascadeConstructor()
     cascade = constructor.create_cascade(G, timeseries)
-            
-def test_large_cascade():
-    raise NotImplementedError
 
-def test_very_large_cascade():
-    raise NotImplementedError
+def test_get_by_id():
+    G = nx.Graph()
+
+    nodea = Node(1, None, "hello world")
+    nodeb = Node(2, None, "i like cats")
+    nodec = Node(3, None, "something else")
+    G.add_node(nodea, label = 'A')
+    G.add_node(nodeb, label = 'B')
+    G.add_node(nodec, label = 'C')
+
+    assert G['A'] == nodea

@@ -3,7 +3,7 @@ from enum import Enum
 
 class AbstractModelEnum(Enum):
     @abstractmethod
-    def get_state_color(self):
+    def color(self):
         pass
 
     @abstractmethod
@@ -14,7 +14,6 @@ class SIModel(AbstractModelEnum):
     SUSCEPTIBLE = "Susceptible"
     INFECTED = "Infected"
     
-    @staticmethod
     def color(self):
         if self == SIModel.SUSCEPTIBLE:
             return "blue"
@@ -26,7 +25,6 @@ class SIRModel(AbstractModelEnum):
     INFECTED = "Infected"
     RECOVERED = "Recovered"
     
-    @staticmethod
     def color(self):
         if self == SIRModel.SUSCEPTIBLE:
             return "blue"

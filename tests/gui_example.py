@@ -32,7 +32,7 @@ def create_graph(df):
                 node_connections[username] += 1
         
         if "booktwt" in text.lower() and created_at <= selected_date.strftime('%Y-%m-%d'):
-            node.infected()
+            node.set_infection_state()
 
     return G
 

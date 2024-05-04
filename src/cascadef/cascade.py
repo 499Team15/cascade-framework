@@ -26,17 +26,16 @@ class Cascade:
 
     def get_graph_at_time(self, time) -> nx.Graph:
         graph = self.graph.copy()
-        infected_nodes = [event.get_vertex() for event in self.infection_events if event.get_time_stamp() <= time]
-        for node in graph.nodes:
-            if node in infected_nodes:
-                graph.nodes[node]["state"] = AbstractModelEnum.INFECTED
-            else:
-                graph.nodes[node]["state"] = AbstractModelEnum.SUSCEPTIBLE
-        return graph
-    
-    def create_gui():
-        # TODO: Implement GUI 
-        pass
+
+        # get all infection events that happened before time
+        infection_events = [event for event in self.infection_events if event.get_time_stamp() <= time]
+
+        # infect nodes in the graph
+        for event in infection_events:
+            graph.nodes[event.get_vertex()]['state'] = event.get_state()
+
+    def __get_node(self, vertex):
+        return self.graph.nodes[vertex]
 
     def create_matplotlib_graph(self, time):
         # TODO: Implement matplotlib graph
