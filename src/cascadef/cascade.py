@@ -28,11 +28,11 @@ class Cascade:
         nx_graph = self.graph.get_networkx_graph()
 
         colors = [node.get_state_at_time(time).color() for node in self.graph.get_nodes()]
-        node_labels = {node: node.get_value() for node in self.graph.get_nodes()}
+        node_labels = {node: node.get_id() for node in self.graph.get_nodes()}
         layout = nx.spring_layout(nx_graph, seed=43)
 
         # Draw the graph
-        nx.draw(nx_graph, pos=layout, with_labels=True, node_color=colors, labels=node_labels, node_size=1000, font_size=12, font_weight='bold')
+        nx.draw(nx_graph, pos=layout, with_labels=True, node_color=colors, labels=node_labels, node_size=500, font_size=12, font_weight='bold')
 
         # Display the graph
         plt.show()
