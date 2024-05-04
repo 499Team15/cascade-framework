@@ -1,31 +1,6 @@
 from cascadef.model import AbstractModelEnum
 import networkx as nx
 
-class Node:
-    def __init__(self, value, time_stamp, content):
-        self.value = value
-        self.time_stamp = time_stamp
-        self.infection_status = False
-        self.content = content
-    
-    def get_value(self):
-        return self.value
-
-    def get_time_stamp(self):
-        return self.time_stamp
-    
-    def set_time_stamp(self, value, time_stamp): 
-        self.time_stamp = time_stamp
-
-    def set_value(self, value):
-        self.value = value
-
-    def get_infection_status(self):
-        return self.infection_status
-    
-    def infected(self):
-        self.infection_status = True
-
 class InfectionEvent:
     def __init__(self, node_id, time_stamp, state: AbstractModelEnum):
         self.vertex = node_id
@@ -41,7 +16,7 @@ class InfectionEvent:
     def get_time_stamp(self):
         return self.time_stamp
 
-class InfectionNode:
+class Node:
     def __init__(self, id, value, starting_state: AbstractModelEnum):
         self.id = id
         self.value = value
@@ -74,11 +49,11 @@ class Graph:
         self.graph = nx.Graph()
         self.id_to_node = {}
 
-    def add_node(self, node: InfectionNode):
+    def add_node(self, node: Node):
         self.graph.add_node(node)
         self.id_to_node[node.get_id()] = node
 
-    def add_edge(self, node1: InfectionNode, node2: InfectionNode, **attr):
+    def add_edge(self, node1: Node, node2: Node, **attr):
         self.graph.add_edge(node1, node2, **attr)
 
     def add_edge_by_id(self, id1, id2, **attr):

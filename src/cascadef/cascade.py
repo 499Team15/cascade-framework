@@ -1,6 +1,6 @@
 import networkx as nx
 from abc import ABC, abstractmethod
-from cascadef.graph import Graph, InfectionEvent, InfectionNode
+from cascadef.graph import Graph, InfectionEvent, Node
 
 
 class Cascade:
@@ -15,7 +15,7 @@ class Cascade:
     def get_graph(self) -> Graph:
         return self.graph
     
-    def get_node(self, id) -> InfectionNode:
+    def get_node(self, id) -> Node:
         return self.graph.get_node(id)
 
     def create_matplotlib_graph(self):

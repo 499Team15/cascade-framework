@@ -1,7 +1,7 @@
 import pandas as pd
 from cascadef import cascade
 from cascadef.cascade import Cascade, CascadeConstructor
-from cascadef.graph import InfectionNode, Graph, InfectionEvent
+from cascadef.graph import Node, Graph, InfectionEvent
 from cascadef.model import SIModel, AbstractModelEnum
 
 class TestState(AbstractModelEnum):
@@ -33,9 +33,9 @@ def test_abstract_state_enum():
 
 def test_cascade_constructor():
     G = Graph()
-    G.add_node(InfectionNode(1, "hello world", SIModel.SUSCEPTIBLE))
-    G.add_node(InfectionNode(2, "i like cats", SIModel.SUSCEPTIBLE))
-    G.add_node(InfectionNode(3, "something else", SIModel.SUSCEPTIBLE))
+    G.add_node(Node(1, "hello world", SIModel.SUSCEPTIBLE))
+    G.add_node(Node(2, "i like cats", SIModel.SUSCEPTIBLE))
+    G.add_node(Node(3, "something else", SIModel.SUSCEPTIBLE))
     timeseries = [1, 2, 1]
     
     constructor = TestCascadeConstructor()
