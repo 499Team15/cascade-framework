@@ -1,4 +1,4 @@
-from cascadef.node import Node
+from cascadef.graph import Node
 import matplotlib.pyplot as plt
 import networkx as nx
 import datetime

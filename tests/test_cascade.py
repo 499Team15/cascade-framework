@@ -1,12 +1,10 @@
-import networkx as nx
 import pandas as pd
-import pytest
 from cascadef import cascade
-from cascadef.cascade import Cascade, InfectionEvent, CascadeConstructor
-from cascadef.node import Node
-from cascadef.model import SIModel
+from cascadef.cascade import Cascade, CascadeConstructor
+from cascadef.graph import InfectionNode, Graph, InfectionEvent
+from cascadef.model import SIModel, AbstractModelEnum
 
-class TestState(cascade.AbstractModelEnum):
+class TestState(AbstractModelEnum):
     SUSCEPTIBLE = "Susceptible"
     INFECTED = "Infected"
     RECOVERED = "Recovered"
@@ -22,9 +20,9 @@ class TestState(cascade.AbstractModelEnum):
 class TestCascadeConstructor(CascadeConstructor):
     def create_cascade(self, graph, timeseries) -> Cascade:
         infection_events = []
-        for node in timeseries:
-            infection_events.append(InfectionEvent(node, SIModel.INFECTED, pd.Timestamp("2021-01-01")))
-
+        for id in timeseries:
+            infection_events.append(InfectionEvent(id, pd.Timestamp("2021-01-01"), SIModel.INFECTED))
+        
         return Cascade(graph, infection_events)
 
 def test_abstract_state_enum():
@@ -32,30 +30,28 @@ def test_abstract_state_enum():
     assert state.get_state_color() == "blue"
     assert str(state) == "Susceptible"
 
-def test_vertex_state():
-    vstate = InfectionEvent("A", TestState.SUSCEPTIBLE, pd.Timestamp("2021-01-01"))
-    assert vstate.get_vertex() == "A"
-    assert vstate.get_state() == TestState.SUSCEPTIBLE
-    assert vstate.get_time_stamp() == pd.Timestamp("2021-01-01")
 
 def test_cascade_constructor():
-    G = nx.Graph()
-    G.add_node(Node(1, None, "hello world"))
-    G.add_node(Node(2, None, "i like cats"))
-    G.add_node(Node(3, None, "something else"))
-    timeseries = [0, 2, 0]
+    G = Graph()
+    G.add_node(InfectionNode(1, "hello world", SIModel.SUSCEPTIBLE))
+    G.add_node(InfectionNode(2, "i like cats", SIModel.SUSCEPTIBLE))
+    G.add_node(InfectionNode(3, "something else", SIModel.SUSCEPTIBLE))
+    timeseries = [1, 2, 1]
     
     constructor = TestCascadeConstructor()
     cascade = constructor.create_cascade(G, timeseries)
 
-def test_get_by_id():
-    G = nx.Graph()
+    assert cascade.get_graph() == G
 
-    nodea = Node(1, None, "hello world")
-    nodeb = Node(2, None, "i like cats")
-    nodec = Node(3, None, "something else")
-    G.add_node(nodea, label = 'A')
-    G.add_node(nodeb, label = 'B')
-    G.add_node(nodec, label = 'C')
+    assert G.get_node(1).get_current_infection_state() == SIModel.INFECTED
+    assert cascade.get_node(1).get_current_infection_state() == SIModel.INFECTED
+    assert cascade.get_node(2).get_current_infection_state() == SIModel.INFECTED
+    assert cascade.get_node(3).get_current_infection_state() == SIModel.SUSCEPTIBLE
 
-    assert G['A'] == nodea
+    assert cascade.get_node(1).get_state_at_time(pd.Timestamp("2020-01-01")) == SIModel.SUSCEPTIBLE
+    assert cascade.get_node(1).get_state_at_time(pd.Timestamp("2022-01-01")) == SIModel.INFECTED
+
+def test_create_cascade():
+    G = Graph()
+    cascade = Cascade(G, [])
+    assert cascade.get_graph() == G

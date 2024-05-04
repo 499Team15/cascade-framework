@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from datetime import datetime
 import pandas as pd
-from cascadef import node as Node
+from cascadef import graph as Node
 
 def create_graph(df):
     G = nx.Graph()
