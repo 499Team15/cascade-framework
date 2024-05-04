@@ -84,6 +84,9 @@ class FileSearchApp:
 
                 infection_criteria = self.entry_criteria.get()
 
+                # Convert 'created_at' column to datetime format
+                df['created_at'] = pd.to_datetime(df['created_at']).dt.strftime('%Y-%m-%d')
+
                 # Creating graph
                 graph = Graph()
 

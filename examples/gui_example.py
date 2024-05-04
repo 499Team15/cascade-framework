@@ -1,151 +1,129 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import re
+import pandas as pd
+from cascadef.graph import Graph, Node, InfectionEvent
+from cascadef.model import AbstractModelEnum, SIModel
 import networkx as nx
 import matplotlib.pyplot as plt
-from datetime import datetime
-import pandas as pd
-from cascadef import graph as Node
+from cascadef.cascade import Cascade, CascadeConstructor
 
-def create_graph(df):
-    G = nx.Graph()
-    nodes_dict = {}
-    node_connections = {}  # Track the number of connections for each node
-    
-    for index, row in df.iterrows():
-        username = row['username']
-        text = row['text']
-        created_at = datetime.strptime(row['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')
-        
-        if username not in nodes_dict:
-            node = Node.Node(username, created_at, text)
-            nodes_dict[username] = node
-            G.add_node(node, label=username)  # Assigning username as label
-            node_connections[username] = 0  # Initialize connection count for the node
-        else:
-            node = nodes_dict[username]
-        
-        # Connect to the first three encountered nodes
-        for existing_node in G.nodes:
-            if existing_node != node and node_connections[username] < 3 and not G.has_edge(node, existing_node):
-                G.add_edge(node, existing_node, color='blue')
-                node_connections[username] += 1
-        
-        if "booktwt" in text.lower() and created_at <= selected_date.strftime('%Y-%m-%d'):
-            node.set_infection_state()
+class TwitterHashtagPlugin(CascadeConstructor):
+    def __init__(self, criteria):
+        self.criteria = criteria
 
-    return G
+    def create_cascade(self, graph, df: pd.DataFrame) -> Cascade:
+        infection_events= []
+        for index, row in df.iterrows():
+            if self.criteria in row['text']:
+                # Create InfectionEvent
+                event = InfectionEvent(node_id=row['username'], time_stamp=row['created_at'], state=SIModel.INFECTED)
+                infection_events.append(event)
 
-def draw_graph(G):
-    pos = nx.random_layout(G)
-    edge_colors = [G[u][v]['color'] for u,v in G.edges()]
-    node_colors = ['red' if node.infection_status else 'blue' for node in G.nodes()]
-    node_sizes = [300 if node.infection_status else 5 for node in G.nodes()]  
-    red_nodes_count = sum(1 for node in G.nodes() if node.infection_status)
-    nx.draw(G, pos, with_labels=False, node_color=node_colors, 
-            edge_color=edge_colors, node_size=5, width=.1)
-    
-    min_x = min(pos[node][0] for node in pos)
-    max_x = max(pos[node][0] for node in pos)
-    min_y = min(pos[node][1] for node in pos)
-    max_y = max(pos[node][1] for node in pos)
-    plt.text((min_x + max_x) / 2, min_y - 0.1 * (max_y - min_y), f"# of Infected Nodes {selected_date.strftime('%Y-%m-%d')}: {red_nodes_count}", fontsize=12, ha='center')
-    plt.show()
+        return Cascade(graph, infection_events)
 
-def generate_network(filepath, df_head, start_at_end=False):
-    try:
-        # Read CSV into DataFrame
-        if filepath.endswith('.csv'):
-            if start_at_end:
-                df = pd.read_csv(filepath).tail(df_head)
-            else:
-                df = pd.read_csv(filepath).head(df_head)
-        elif filepath.endswith('.tsv'):
-            if start_at_end:
-                df = pd.read_csv(filepath, sep='\t').tail(df_head)
-            else:
-                df = pd.read_csv(filepath, sep='\t').head(df_head)
-        elif filepath.endswith('.xlsx'):
-            if start_at_end:
-                df = pd.read_excel(filepath).tail(df_head)
-            else:
-                df = pd.read_excel(filepath).head(df_head)
-        else:
-            raise ValueError("Unsupported file format. Please select a CSV, TSV, or Excel file.")
+class FileSearchApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("File Search")
+        self.master.geometry("800x350")  # Set the window size
 
-        # Check if required columns are present
-        required_columns = ['username', 'text', 'created_at']  # Update with your required column names
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        if missing_columns:
-            messagebox.showerror("Error", f"Missing columns: {', '.join(missing_columns)}")
-            return
+        self.label_file = tk.Label(master, text="Select a CSV or Excel file:")
+        self.label_file.grid(row=0, column=0, padx=10, pady=10)
 
-        # Create graph
-        G = create_graph(df)
+        self.label_nodes = tk.Label(master, text="Number of Nodes:")
+        self.label_nodes.grid(row=1, column=0, padx=10, pady=10)
 
-        # Draw graph
-        draw_graph(G)
-    except Exception as e:
-        messagebox.showerror("Error", str(e))
+        self.entry_nodes = tk.Entry(master)
+        self.entry_nodes.grid(row=1, column=1, padx=10, pady=10)
 
-def on_generate_button_click():
-    global selected_date
-    selected_date_str = entry_date.get()
+        self.label_criteria = tk.Label(master, text="Infection Criteria:")
+        self.label_criteria.grid(row=2, column=0, padx=10, pady=10)
 
-    if not re.match(r'\d{4}/\d{2}/\d{2}', selected_date_str):
-        messagebox.showerror("Error", "Date format must be YYYY/MM/DD")
-        return
+        self.entry_criteria = tk.Entry(master)
+        self.entry_criteria.grid(row=2, column=1, padx=10, pady=10)
 
-    selected_date = datetime.strptime(selected_date_str, '%Y/%m/%d')
+        self.search_button = tk.Button(master, text="Search File", command=self.search_file)
+        self.search_button.grid(row=3, column=0, padx=10, pady=10)
 
-    filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"),
-                                                      ("TSV files", "*.tsv"),
-                                                      ("Excel files", "*.xlsx")])
-    if not filepath:
-        return  # If no file selected, return
+        self.cancel_button = tk.Button(master, text="Cancel", command=self.master.quit)
+        self.cancel_button.grid(row=3, column=1, padx=10, pady=10)
 
-    df_head = int(entry_head.get())
-    if df_head <= 0:
-        raise ValueError("Head number must be a positive integer")
+        self.result_label = tk.Label(master, text="")
+        self.result_label.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
 
-    start_at_end = dropdown_start_at.get() == "Start at End"
+        self.total_infection_label = tk.Label(master, text="Total Infection Events: 0")
+        self.total_infection_label.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
 
-    generate_network(filepath, df_head, start_at_end)
+    def search_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ("Excel files", "*.xlsx;*.xls")])
+        if file_path:
+            try:
+                if file_path.endswith('.csv'):
+                    df = pd.read_csv(file_path)
+                elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+                    df = pd.read_excel(file_path)
+                else:
+                    raise ValueError("Unsupported file format.")
 
+                required_columns = ['username', 'text', 'created_at']  # Required columns
+                for col in required_columns:
+                    if col not in df.columns:
+                        raise ValueError(f"The file is missing the required '{col}' column.")
 
-# Create main window
-root = tk.Tk()
-root.title("Network Graph Generator")
+                try:
+                    num_nodes = int(self.entry_nodes.get())
+                    if num_nodes <= 0:
+                        raise ValueError("Number of nodes must be a positive integer.")
+                    unique_usernames = df['username'].unique()[:num_nodes]
 
-# Set window size
-root.geometry("600x400")  # Set the size to 600x400 pixels
+                    # Slice the DataFrame to the first x rows
+                    df = df.head(num_nodes)
 
-# Create label for the date selection
-label_date = tk.Label(root, text="Enter Date in Format: YYYY/MM/DD")
-label_date.pack()
+                except ValueError:
+                    raise ValueError("Please enter a valid number of nodes.")
 
-# Create entry for date input
-entry_date = tk.Entry(root)
-entry_date.pack()
+                infection_criteria = self.entry_criteria.get()
 
-# Create label for DataFrame Head Number
-label_head = tk.Label(root, text="Number of Nodes to Display:")
-label_head.pack()
+                # Convert 'created_at' column to datetime format
+                df['created_at'] = pd.to_datetime(df['created_at']).dt.strftime('%Y-%m-%d')
 
-# Create entry for DataFrame Head Number
-entry_head = tk.Entry(root)
-entry_head.pack()
+                # Creating graph
+                graph = Graph()
 
-# Create dropdown for start option
-start_options = ["Start at Beginning", "Start at End"]
-dropdown_start_at = tk.StringVar(root)
-dropdown_start_at.set(start_options[0])  # Default value
-dropdown_start_menu = tk.OptionMenu(root, dropdown_start_at, *start_options)
-dropdown_start_menu.pack()
+                # Create nodes
+                for username in unique_usernames:
+                    node = Node(id=username, value=None, starting_state=SIModel.SUSCEPTIBLE)
+                    graph.add_node(node)
 
-# Create button
-button_generate = tk.Button(root, text="Generate network", command=on_generate_button_click, width=15)
-button_generate.pack()
+                # Create instance of TwitterHashtagPlugin
+                plugin = TwitterHashtagPlugin(criteria=infection_criteria)
 
-# Run Tkinter event loop
-root.mainloop()
+                # Call create_cascade method
+                cascade = plugin.create_cascade(graph, df)
+                self.total_infection_label.config(text=f"Total Infection Events: {len(cascade.get_infection_events())}")
+
+                # Display graph
+                self.display_graph(graph.get_networkx_graph())
+
+            except pd.errors.ParserError:
+                messagebox.showerror("Error", "Error parsing the file. Please make sure it's a valid CSV or Excel file.")
+            except ValueError as e:
+                messagebox.showerror("Error", str(e))
+            except Exception:
+                messagebox.showerror("Error", "An unexpected error occurred.")
+
+    def display_graph(self, graph):
+        plt.figure(figsize=(8, 6))
+        pos = nx.random_layout(graph)  # Use random layout for positioning nodes
+        node_labels = {node: node.get_id() for node in graph.nodes}  # Create a dictionary mapping nodes to their IDs
+        nx.draw(graph, pos, labels=node_labels, with_labels=True, node_color=[node.starting_state.color() for node in graph.nodes], node_size=500)
+        plt.title("User Infection Network")
+        plt.show()
+
+def main():
+    root = tk.Tk()
+    app = FileSearchApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
