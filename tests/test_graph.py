@@ -49,3 +49,22 @@ def test_infection_event():
     assert vstate.get_node_id() == "A"
     assert vstate.get_state() == SIModel.SUSCEPTIBLE
     assert vstate.get_time_stamp() == pd.Timestamp("2021-01-01")
+
+def test_neighbors():
+    graph = Graph()
+    node_1 = Node(1, 6, SIModel.SUSCEPTIBLE)
+    node_2 = Node(2, 3, SIModel.SUSCEPTIBLE)
+    node_3 = Node(3, 3, SIModel.SUSCEPTIBLE)
+
+    graph.add_node(node_1)
+    graph.add_node(node_2)
+    graph.add_node(node_3)
+
+    graph.add_edge(node_1, node_2)
+    graph.add_edge(node_2, node_3)
+
+    for neighbor in graph.neighbors(1):
+        assert neighbor == node_2
+
+    for neighbor in graph.neighbors(2):
+        assert neighbor == node_1 or neighbor == node_3

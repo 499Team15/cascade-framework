@@ -43,6 +43,7 @@ class Node:
                 return event.get_state()
 
         return self.starting_state
+    
 
 class Graph:
     def __init__(self) -> None:
@@ -60,6 +61,15 @@ class Graph:
         node1 = self.id_to_node[id1]
         node2 = self.id_to_node[id2]
         self.graph.add_edge(node1, node2, **attr)
+
+    def neighbors(self, id):
+        node = self.id_to_node.get(id, None)
+        if node is not None:
+            return self.graph.neighbors(node)
+        return []
+
+    def get_nodes(self):
+        return self.graph.nodes
 
     def get_node(self, id):
         return self.id_to_node.get(id, None)

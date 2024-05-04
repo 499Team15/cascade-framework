@@ -9,13 +9,18 @@ class TestState(AbstractModelEnum):
     INFECTED = "Infected"
     RECOVERED = "Recovered"
 
-    def get_state_color(self):
+    def color(self):
         if self == TestState.SUSCEPTIBLE:
             return "blue"
         elif self == TestState.INFECTED:
             return "red"
         elif self == TestState.RECOVERED:
             return "green"
+
+def test_abstract_state_enum():
+    state = TestState.SUSCEPTIBLE
+    assert state.color() == "blue"
+    assert str(state) == "Susceptible"
 
 class TestCascadeConstructor(CascadeConstructor):
     def create_cascade(self, graph, timeseries) -> Cascade:
@@ -24,12 +29,6 @@ class TestCascadeConstructor(CascadeConstructor):
             infection_events.append(InfectionEvent(id, pd.Timestamp("2021-01-01"), SIModel.INFECTED))
         
         return Cascade(graph, infection_events)
-
-def test_abstract_state_enum():
-    state = TestState.SUSCEPTIBLE
-    assert state.get_state_color() == "blue"
-    assert str(state) == "Susceptible"
-
 
 def test_cascade_constructor():
     G = Graph()

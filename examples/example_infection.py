@@ -1,32 +1,41 @@
-import networkx as nx
 import random
-from cascadef.cascade import CascadeConstructor, Cascade, InfectionEvent
+import networkx as nx
 from cascadef.model import SIModel
+from cascadef.graph import Graph, InfectionEvent, Node
+from cascadef.cascade import CascadeConstructor, Cascade
 
 # Create a graph
-graph = nx.Graph()
+graph = Graph()
 
 # Add nodes (people)
 people = ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Hannah", "Ivan", "Julia"]
 for person in people:
-    graph.add_node(person)
+    node = Node(person, person, SIModel.SUSCEPTIBLE)
+    graph.add_node(node)
 
-# Add edges (daily contacts)
-graph.add_edge("Alice", "Bob")
-graph.add_edge("Alice", "Charlie")
-graph.add_edge("Bob", "David")
-graph.add_edge("Charlie", "Eve")
-graph.add_edge("Eve", "Frank")
-graph.add_edge("Frank", "Grace")
-graph.add_edge("Grace", "Hannah")
-graph.add_edge("Hannah", "Ivan")
-graph.add_edge("Ivan", "Julia")
+# Add edges (relationships)
+relationships = [
+    ("Alice", "Bob"),
+    ("Alice", "Charlie"),
+    ("Bob", "David"),
+    ("Charlie", "David"),
+    ("David", "Eve"),
+    ("Eve", "Frank"),
+    ("Frank", "Grace"),
+    ("Grace", "Hannah"),
+    ("Hannah", "Ivan"),
+    ("Ivan", "Julia"),
+    ("Julia", "Alice")
+]
+for relationship in relationships:
+    graph.add_edge_by_id(*relationship)
 
 # Add random edges (daily contacts)
-num_edges = random.randint(5, 15)  # Number of edges to add (adjust as needed)
-potential_edges = list(nx.non_edges(graph))
+nx_graph = graph.get_networkx_graph()
+num_edges = random.randint(1, 5)  # Number of edges to add (adjust as needed)
+potential_edges = list(nx.non_edges(nx_graph))
 added_edges = random.sample(potential_edges, num_edges)
-graph.add_edges_from(added_edges)
+nx_graph.add_edges_from(added_edges)
 
 # Set an initial infected person
 initial_infection = "Alice"
@@ -44,21 +53,30 @@ while len(infected) < len(people):
         neighbors = graph.neighbors(person)
         for neighbor in neighbors:
             if neighbor not in infected and random.random() < 0.5:  # 50% chance of infection
-                newly_infected.add(neighbor)
-                print(f"{neighbor} got infected from {person}")
+                newly_infected.add(neighbor.get_id())
+                print(f"{neighbor.get_id()} got infected from {person}")
 
     infected.update(newly_infected)
-    print(f"Currently infected: {', '.join(infected)}\n")
+
+    print(f"Current infections: {', '.join(infected)}")
 
 # Implement a custom cascade constructor
-class ExampleCascade(CascadeConstructor):
+class ExampleInfectionPlugin(CascadeConstructor):
     def create_cascade(graph, timeseries) -> Cascade:
-        vertex_states = []
-        for time, infected in enumerate(timeseries):
-            for person in infected:
-                state = SIModel.INFECTED if time > 0 else SIModel.SUSCEPTIBLE
-                vertex_states.append(InfectionEvent(person, state, time))
-        return Cascade(graph, vertex_states)
+        infection_events = []
+        for time, person in enumerate(timeseries):
+            state = SIModel.INFECTED
+            infection_events.append(InfectionEvent(person, time, state))
 
-cascade = ExampleCascade.create_cascade(graph, infected)
-cascade.example_plot()
+        print([event.get_node_id() for event in infection_events])
+        return Cascade(graph, infection_events)
+
+cascade = ExampleInfectionPlugin.create_cascade(graph, infected)
+cascade.create_matplotlib_graph(0) 
+cascade.create_matplotlib_graph(1) 
+cascade.create_matplotlib_graph(2) 
+cascade.create_matplotlib_graph(3) 
+cascade.create_matplotlib_graph(4) 
+cascade.create_matplotlib_graph(5)  
+cascade.create_matplotlib_graph(6) 
+cascade.create_matplotlib_graph(0) 
