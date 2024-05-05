@@ -41,7 +41,8 @@ nx_graph.add_edges_from(added_edges)
 initial_infection = "Alice"
 
 # Simulate infection spread over time
-infected = set([initial_infection])
+infected = set([initial_infection])  # Initial infected person
+infection_events = [InfectionEvent(initial_infection, 0, SIModel.INFECTED)]
 time_step = 0
 
 while len(infected) < len(people):
@@ -57,26 +58,25 @@ while len(infected) < len(people):
                 print(f"{neighbor.get_id()} got infected from {person}")
 
     infected.update(newly_infected)
-
-    print(f"Current infections: {', '.join(infected)}")
+    infection_events.extend([InfectionEvent(person, time_step, SIModel.INFECTED) for person in newly_infected])
+    print(f"Newly infected: {newly_infected}")
 
 # Implement a custom cascade constructor
 class ExampleInfectionPlugin(CascadeConstructor):
     def create_cascade(graph, timeseries) -> Cascade:
-        infection_events = []
-        for time, person in enumerate(timeseries):
-            state = SIModel.INFECTED
-            infection_events.append(InfectionEvent(person, time, state))
+        return Cascade(graph, timeseries)
 
-        print([event.get_node_id() for event in infection_events])
-        return Cascade(graph, infection_events)
+def print_currently_infected_at_time(cascade, time):
+    nodes_in_state = cascade.get_nodes_in_state_at_time(time, SIModel.INFECTED)
+    print("Currently infected nodes:{}, at time:{}".format([node.get_id() for node in nodes_in_state], time))
+    cascade.create_matplotlib_graph(time) 
 
-cascade = ExampleInfectionPlugin.create_cascade(graph, infected)
-cascade.create_matplotlib_graph(0) 
-cascade.create_matplotlib_graph(1) 
-cascade.create_matplotlib_graph(2) 
-cascade.create_matplotlib_graph(3) 
-cascade.create_matplotlib_graph(4) 
-cascade.create_matplotlib_graph(5)  
-cascade.create_matplotlib_graph(6) 
-cascade.create_matplotlib_graph(0) 
+cascade = ExampleInfectionPlugin.create_cascade(graph, infection_events)
+print_currently_infected_at_time(cascade, 0)
+print_currently_infected_at_time(cascade, 1)
+print_currently_infected_at_time(cascade, 2)
+print_currently_infected_at_time(cascade, 3)
+print_currently_infected_at_time(cascade, 4)
+print_currently_infected_at_time(cascade, 5)
+print_currently_infected_at_time(cascade, 6)
+print_currently_infected_at_time(cascade, 7)

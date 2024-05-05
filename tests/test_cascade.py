@@ -31,6 +31,32 @@ class TestCascadeConstructor(CascadeConstructor):
         return Cascade(graph, infection_events)
 
 def test_cascade_constructor():
+    cascade = create_cascade()
+
+    assert cascade.get_node(1).get_current_infection_state() == SIModel.INFECTED
+    assert cascade.get_node(2).get_current_infection_state() == SIModel.INFECTED
+    assert cascade.get_node(3).get_current_infection_state() == SIModel.SUSCEPTIBLE
+
+    assert cascade.get_node(1).get_state_at_time(pd.Timestamp("2020-01-01")) == SIModel.SUSCEPTIBLE
+    assert cascade.get_node(1).get_state_at_time(pd.Timestamp("2022-01-01")) == SIModel.INFECTED
+
+def test_get_nodes_in_state_at_time():
+    cascade = create_cascade()
+    nodes = cascade.get_nodes_in_state_at_time(pd.Timestamp("2020-01-01"), SIModel.SUSCEPTIBLE)
+    assert len(nodes) == 3
+
+    nodes = cascade.get_nodes_in_state_at_time(pd.Timestamp("2022-01-01"), SIModel.INFECTED)
+    assert len(nodes) == 2
+
+    node = cascade.get_nodes_in_state_at_time(pd.Timestamp("2022-01-01"), SIModel.SUSCEPTIBLE)[0]
+    assert node.get_id() == 3
+
+def test_create_cascade():
+    G = Graph()
+    cascade = Cascade(G, [])
+    assert cascade.get_graph() == G
+
+def create_cascade():
     G = Graph()
     G.add_node(Node(1, "hello world", SIModel.SUSCEPTIBLE))
     G.add_node(Node(2, "i like cats", SIModel.SUSCEPTIBLE))
@@ -39,18 +65,6 @@ def test_cascade_constructor():
     
     constructor = TestCascadeConstructor()
     cascade = constructor.create_cascade(G, timeseries)
-
     assert cascade.get_graph() == G
 
-    assert G.get_node(1).get_current_infection_state() == SIModel.INFECTED
-    assert cascade.get_node(1).get_current_infection_state() == SIModel.INFECTED
-    assert cascade.get_node(2).get_current_infection_state() == SIModel.INFECTED
-    assert cascade.get_node(3).get_current_infection_state() == SIModel.SUSCEPTIBLE
-
-    assert cascade.get_node(1).get_state_at_time(pd.Timestamp("2020-01-01")) == SIModel.SUSCEPTIBLE
-    assert cascade.get_node(1).get_state_at_time(pd.Timestamp("2022-01-01")) == SIModel.INFECTED
-
-def test_create_cascade():
-    G = Graph()
-    cascade = Cascade(G, [])
-    assert cascade.get_graph() == G
+    return cascade
