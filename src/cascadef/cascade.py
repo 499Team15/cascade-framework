@@ -20,10 +20,14 @@ class Cascade:
 
     def get_end_time(self):
         ''' Returns the time of the last infection event '''
+        if len(self.infection_events) == 0:
+            return None
         return self.infection_events[-1].get_time_stamp()
 
     def get_start_time(self):
         ''' Returns the time of the first infection event '''
+        if len(self.infection_events) == 0:
+            return None
         return self.infection_events[0].get_time_stamp()
 
     def get_graph(self) -> Graph:
@@ -61,7 +65,7 @@ class Cascade:
         # Draw the graph
         nx.draw(nx_graph, pos=layout, with_labels=True, node_color=colors, labels=node_labels, node_size=500, font_size=12, font_weight='bold', ax=ax)
 
-        if not slider:
+        if not slider or self.get_end_time() == self.get_start_time():
             plt.show()
             return
 
