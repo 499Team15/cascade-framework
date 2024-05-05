@@ -69,7 +69,7 @@ class ExampleInfectionPlugin(CascadeConstructor):
 def print_currently_infected_at_time(cascade, time):
     nodes_in_state = cascade.get_nodes_in_state_at_time(time, SIModel.INFECTED)
     print("Currently infected nodes:{}, at time:{}".format([node.get_id() for node in nodes_in_state], time))
-    cascade.create_matplotlib_graph(slider=True, time=5, layout=nx.spiral_layout(cascade.graph.get_networkx_graph()))
+    cascade.create_matplotlib_graph(slider=True, time=0)
 
 cascade = ExampleInfectionPlugin.create_cascade(graph, infection_events)
 print_currently_infected_at_time(cascade, 0)
