@@ -46,7 +46,7 @@ class Cascade:
                 nodes_in_state.append(node)
         return nodes_in_state
 
-    def create_matplotlib_graph(self, time=None, slider=True, **kwargs):
+    def create_matplotlib_graph(self, time=None, slider=True, node_size=500, font_size=12, font_weight='bold', **kwargs):
         nx_graph = self.graph.get_networkx_graph()
 
         if time is None:
@@ -57,17 +57,33 @@ class Cascade:
         else:
             layout = nx.spring_layout(nx_graph, seed=43)
 
-        colors = [node.get_state_at_time(time).color() for node in nx_graph.nodes()]
-        node_labels = {node: node.get_id() for node in nx_graph.nodes()}
 
-        fig, ax = plt.subplots()
 
         # Draw the graph
-        nx.draw(nx_graph, pos=layout, with_labels=True, node_color=colors, labels=node_labels, node_size=500, font_size=12, font_weight='bold', ax=ax)
+        def draw_graph(time, ax = None):
+            colors = [node.get_state_at_time(time).color() for node in nx_graph.nodes()]
+            node_labels = {node: node.get_id() for node in nx_graph.nodes()}
+            nx.draw(
+                nx_graph, 
+                pos=layout, 
+                with_labels=True, 
+                node_color=colors, 
+                labels=node_labels, 
+                node_size=node_size, 
+                font_size=font_size, 
+                font_weight=font_weight,
+                ax=ax
+                )
+
+        draw_graph(time)
+
 
         if not slider or self.get_end_time() == self.get_start_time():
-            plt.show()
+            #Uncomment to run example_infection.py (1/2)
+            #plt.show()
             return
+
+        fig, ax = plt.subplots()
 
         # Create a slider widget
         slider_ax = plt.axes([0.2, 0.02, 0.6, 0.03])
@@ -75,16 +91,17 @@ class Cascade:
 
         # Function to update the graph based on the slider value
         def update_graph(new_time):
+            ax.clear()
             new_time = int(new_time)
-            colors = [node.get_state_at_time(new_time).color() for node in nx_graph.nodes()]
-            nx.draw(nx_graph, pos=layout, with_labels=True, node_color=colors, labels=node_labels, node_size=500, font_size=12, font_weight='bold', ax=ax)
+            draw_graph(new_time,ax=ax)
             fig.canvas.draw_idle()
 
         # Connect the slider to the update_graph function
         time_slider.on_changed(update_graph)
 
         # Display the graph
-        plt.show()
+        #Uncomment to run example_infection.py (2/2)
+        #plt.show()
 
     def animate(self):
         # TODO: Implement animation
