@@ -82,7 +82,7 @@ class Cascade:
                 nodes_in_state.append(node)
         return nodes_in_state
 
-    def create_matplotlib_graph(self, time=None, slider=True, node_size=500, font_size=10, font_weight='bold', **kwargs):
+    def create_matplotlib_graph(self, time=None, slider=True, node_size=500, font_size=10, font_weight='bold', no_show=False, **kwargs):
         """
         Creates a matplotlib graph representation of the cascade.
 
@@ -122,15 +122,15 @@ class Cascade:
                 ax=ax
                 )
 
-        draw_graph(time)
-
 
         if not slider or self.get_end_time() == self.get_start_time():
-            #Uncomment to run example_infection.py (1/2)
-            #plt.show()
+            draw_graph(time)
+            if no_show == False:
+                plt.show()
             return
 
         fig, ax = plt.subplots()
+        draw_graph(time, ax=ax)
 
         # Create a slider widget
         slider_ax = plt.axes([0.2, 0.02, 0.6, 0.03])
@@ -147,8 +147,8 @@ class Cascade:
         time_slider.on_changed(update_graph)
 
         # Display the graph
-        #Uncomment to run example_infection.py (2/2)
-        #plt.show()
+        if no_show == False:
+            plt.show()
 
     def animate(self):
         """

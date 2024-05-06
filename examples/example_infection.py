@@ -3,6 +3,7 @@ import networkx as nx
 from cascadef.model import SIModel
 from cascadef.graph import Graph, InfectionEvent, Node
 from cascadef.cascade import CascadeConstructor, Cascade
+from matplotlib import pyplot as plt
 
 # Create a graph
 graph = Graph()
@@ -70,6 +71,7 @@ def print_currently_infected_at_time(cascade, time):
     nodes_in_state = cascade.get_nodes_in_state_at_time(time, SIModel.INFECTED)
     print("Currently infected nodes:{}, at time:{}".format([node.get_id() for node in nodes_in_state], time))
     cascade.create_matplotlib_graph(slider=True, time=0, node_size=1000)
+    plt.show()
 
 cascade = ExampleInfectionPlugin.create_cascade(graph, infection_events)
 print_currently_infected_at_time(cascade, 0)
