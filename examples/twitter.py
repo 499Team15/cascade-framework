@@ -70,7 +70,7 @@ def open_file(root):
         # Embed the graph into the Tkinter window
         fig = plt.figure()
 
-        cascade.create_matplotlib_graph(time=df['created_at'].min(), slider=False, node_size=50, font_size=6)
+        cascade.create_matplotlib_graph(time=df['created_at'].min(), slider=False, node_size=50, font_size=6, no_show=True)
         canvas = FigureCanvasTkAgg(fig, master=graph_frame)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
