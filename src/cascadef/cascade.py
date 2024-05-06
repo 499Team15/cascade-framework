@@ -104,11 +104,10 @@ class Cascade:
         else:
             layout = nx.spring_layout(nx_graph, seed=43)
 
-        fig, ax = plt.subplots()
 
 
         # Draw the graph
-        def draw_graph(time):
+        def draw_graph(time, ax = None):
             colors = [node.get_state_at_time(time).color() for node in nx_graph.nodes()]
             node_labels = {node: node.get_id() for node in nx_graph.nodes()}
             nx.draw(
@@ -118,16 +117,20 @@ class Cascade:
                 node_color=colors, 
                 labels=node_labels, 
                 node_size=node_size, 
-                font_size=12, 
+                font_size=font_size, 
                 font_weight=font_weight,
-                ax=ax)
+                ax=ax
+                )
 
         draw_graph(time)
 
 
         if not slider or self.get_end_time() == self.get_start_time():
-            plt.show()
+            #Uncomment to run example_infection.py (1/2)
+            #plt.show()
             return
+
+        fig, ax = plt.subplots()
 
         # Create a slider widget
         slider_ax = plt.axes([0.2, 0.02, 0.6, 0.03])
@@ -137,14 +140,15 @@ class Cascade:
         def update_graph(new_time):
             ax.clear()
             new_time = int(new_time)
-            draw_graph(new_time)
+            draw_graph(new_time,ax=ax)
             fig.canvas.draw_idle()
 
         # Connect the slider to the update_graph function
         time_slider.on_changed(update_graph)
 
         # Display the graph
-        plt.show()
+        #Uncomment to run example_infection.py (2/2)
+        #plt.show()
 
     def animate(self):
         """

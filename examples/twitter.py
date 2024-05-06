@@ -1,10 +1,11 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox
 import pandas as pd
+import tkinter as tk
+from tkinter import filedialog, ttk, messagebox
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from cascadef.graph import Graph, Node, InfectionEvent
 from cascadef.model import AbstractModelEnum, SIModel
-import networkx as nx
-import matplotlib.pyplot as plt
 from cascadef.cascade import Cascade, CascadeConstructor
 
 class TwitterHashtagPlugin(CascadeConstructor):
@@ -21,110 +22,192 @@ class TwitterHashtagPlugin(CascadeConstructor):
 
         return Cascade(graph, infection_events)
 
-class FileSearchApp:
-    def __init__(self, master):
-        self.master = master
-        self.master.title("File Search")
-        self.master.geometry("800x350")  # Set the window size
 
-        self.label_file = tk.Label(master, text="Select a CSV or Excel file:")
-        self.label_file.grid(row=0, column=0, padx=10, pady=10)
+def open_file(root):
+    # Retrieve the text entered in the criteria and nodes entry fields
+    infection_criteria = criteria_entry.get()
+    num_nodes = int(nodes_entry.get())
 
-        self.label_nodes = tk.Label(master, text="Number of Nodes:")
-        self.label_nodes.grid(row=1, column=0, padx=10, pady=10)
+    if num_nodes <= 0:
+        messagebox.showerror("Number of Nodes must be a positive integer")
+    # Check if either criteria or nodes fields are empty
+    if not infection_criteria or not num_nodes:
+        messagebox.showerror("Error", "Please enter both Infection criteria and Number of Nodes.")
+        return
 
-        self.entry_nodes = tk.Entry(master)
-        self.entry_nodes.grid(row=1, column=1, padx=10, pady=10)
+    filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    if filename:
+        df = pd.read_csv(filename)
+        required_columns = ['username', 'text', 'created_at']  # Required columns
+        for col in required_columns:
+            if col not in df.columns:
+                raise ValueError(f"The file is missing the required '{col}' column.")
+        # Convert 'created_at' column to datetime
+        df['created_at'] = pd.to_datetime(df['created_at']).dt.strftime('%Y-%m-%d')
+        df.sort_values(by='created_at', inplace=True)  # Sort DataFrame by 'created_at' column
+        min_date = pd.to_datetime(df['created_at'].min())  
+        max_date = pd.to_datetime(df['created_at'].max())  
+        unique_usernames = df['username'].unique()
 
-        self.label_criteria = tk.Label(master, text="Infection Criteria:")
-        self.label_criteria.grid(row=2, column=0, padx=10, pady=10)
+        selected_usernames = unique_usernames[:num_nodes]
+        
+        filtered_df = df[df['username'].isin(selected_usernames)]
 
-        self.entry_criteria = tk.Entry(master)
-        self.entry_criteria.grid(row=2, column=1, padx=10, pady=10)
+        #Create and populate graph with states
+        graph = Graph()
+        for username in selected_usernames:
+            node = Node(id=username, value=None, starting_state=SIModel.SUSCEPTIBLE)
+            graph.add_node(node)
+        plugin = TwitterHashtagPlugin(criteria=infection_criteria)
+        
+        # Call create_cascade method
+        cascade = plugin.create_cascade(graph, filtered_df)
 
-        self.search_button = tk.Button(master, text="Search File", command=self.search_file)
-        self.search_button.grid(row=3, column=0, padx=10, pady=10)
+        graph_frame = tk.Frame(root)
+        graph_frame.pack()
 
-        self.cancel_button = tk.Button(master, text="Cancel", command=self.master.quit)
-        self.cancel_button.grid(row=3, column=1, padx=10, pady=10)
 
-        self.result_label = tk.Label(master, text="")
-        self.result_label.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+        # Embed the graph into the Tkinter window
+        fig = plt.figure()
 
-        self.total_infection_label = tk.Label(master, text="Total Infection Events: 0")
-        self.total_infection_label.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
+        cascade.create_matplotlib_graph(time=df['created_at'].min(), slider=False, node_size=50, font_size=6)
+        canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        create_slider(min_date, max_date, root, graph_frame, cascade)
 
-    def search_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ("Excel files", "*.xlsx;*.xls")])
-        if file_path:
-            try:
-                if file_path.endswith('.csv'):
-                    df = pd.read_csv(file_path)
-                elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
-                    df = pd.read_excel(file_path)
-                else:
-                    raise ValueError("Unsupported file format.")
+        
 
-                required_columns = ['username', 'text', 'created_at']  # Required columns
-                for col in required_columns:
-                    if col not in df.columns:
-                        raise ValueError(f"The file is missing the required '{col}' column.")
 
-                try:
-                    num_nodes = int(self.entry_nodes.get())
-                    if num_nodes <= 0:
-                        raise ValueError("Number of nodes must be a positive integer.")
-                    unique_usernames = df['username'].unique()[:num_nodes]
+def create_slider(min_date, max_date, root, graph_frame, cascade: Cascade):
+    def get_selected_date(value):
+        selected_date = min_date + timedelta(days=value)
+        label.config(text="Selected Date: " + selected_date.strftime("%Y-%m-%d"))
+        
+        #Clear current graph
+        for widget in graph_frame.winfo_children():
+            widget.destroy()
+        
+        #Draw new graph at selected date
+        fig = plt.figure()
+        cascade.create_matplotlib_graph(time=selected_date.strftime("%Y-%m-%d"), slider=False, node_size=50, font_size=6)
+        canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        num_of_infected_label.config(text=f"Number of Nodes Infected At Current Time {len(cascade.get_nodes_in_state_at_time(selected_date.strftime("%Y-%m-%d"), SIModel.INFECTED))}")
+      
 
-                    # Slice the DataFrame to the first x rows
-                    df = df.head(num_nodes)
 
-                except ValueError:
-                    raise ValueError("Please enter a valid number of nodes.")
+    #Helper for changing date with slider
+    def slider_changed(event):
+        value = int(slider.get())
+        get_selected_date(value)
 
-                infection_criteria = self.entry_criteria.get()
+    #Handles manual date entry
+    def manual_date_change(event=None):
+        input_date_str = date_entry.get()
+        #Ensure date is valid fromat and within boundaries
+        try:
+            input_date = pd.to_datetime(input_date_str)  
 
-                # Convert 'created_at' column to datetime format
-                df['created_at'] = pd.to_datetime(df['created_at']).dt.strftime('%Y-%m-%d')
+            if min_date <= input_date <= max_date:
+                #Set Slider Position
+                days_diff = (input_date - min_date).days
+                slider.set(days_diff)
+                label.config(text="Selected Date: " + input_date.strftime("%Y-%m-%d"))
 
-                # Creating graph
-                graph = Graph()
+                #Clear current graph and draw new one at date
+                for widget in graph_frame.winfo_children():
+                    widget.destroy()
 
-                # Create nodes
-                for username in unique_usernames:
-                    node = Node(id=username, value=None, starting_state=SIModel.SUSCEPTIBLE)
-                    graph.add_node(node)
+                fig = plt.figure()
+                cascade.create_matplotlib_graph(time=input_date.strftime("%Y-%m-%d"), slider=False, node_size=50, font_size=6)
+                canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+                canvas.draw()
+                canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+                
+                num_of_infected_label.config(text=f"Number of Nodes Infected At Current Time {len(cascade.get_nodes_in_state_at_time(input_date.strftime("%Y-%m-%d"), SIModel.INFECTED))}")
 
-                # Create instance of TwitterHashtagPlugin
-                plugin = TwitterHashtagPlugin(criteria=infection_criteria)
+            else:
+                raise ValueError
+            label_error.config(text="")
+            date_entry.delete(0, tk.END)  # Clear entry field
+        except ValueError:
+            label_error.config(text="Not a valid date", fg="red")
 
-                # Call create_cascade method
-                cascade = plugin.create_cascade(graph, df)
-                cascade.create_matplotlib_graph('2022-08-17')
-                self.total_infection_label.config(text=f"Total Infection Events: {len(cascade.get_infection_events())}")
+    def on_entry_key_press(event):
+        if event.keysym == 'Return':
+            manual_date_change()
 
-                # Display graph
-                #self.display_graph(graph.get_networkx_graph())
+    label_frame = tk.Frame(root)
+    label_frame.pack(padx=10, pady=10)
 
-            except pd.errors.ParserError:
-                messagebox.showerror("Error", "Error parsing the file. Please make sure it's a valid CSV or Excel file.")
-            except ValueError as e:
-                messagebox.showerror("Error", str(e))
-            except Exception:
-                messagebox.showerror("Error", "An unexpected error occurred.")
+    label = tk.Label(label_frame, text="")
+    label.pack(padx=10, pady=10)
+    label.config(text="Selected Date: " + min_date.strftime("%Y-%m-%d"))
 
-    """def display_graph(self, graph):
-        plt.figure(figsize=(8, 6))
-        pos = nx.random_layout(graph)  # Use random layout for positioning nodes
-        node_labels = {node: node.get_id() for node in graph.nodes}  # Create a dictionary mapping nodes to their IDs
-        nx.draw(graph, pos, labels=node_labels, with_labels=True, node_color=[node.starting_state.color() for node in graph.nodes], node_size=500)
-        plt.title("User Infection Network")
-        plt.show()"""
 
-def main():
-    root = tk.Tk()
-    app = FileSearchApp(root)
-    root.mainloop()
+    date_frame = tk.Frame(root)
+    date_frame.pack(padx=10, pady=10)
+
+    date_label = tk.Label(date_frame, text=f"Enter Date or Use Slider ({min_date.strftime("%Y-%m-%d")} - {max_date.strftime("%Y-%m-%d")}):")
+    date_label.grid(row=0, column=0)
+
+    date_entry = tk.Entry(date_frame)
+    date_entry.grid(row=0, column=1)
+    date_entry.bind("<Return>", on_entry_key_press)
+
+    select_button = tk.Button(date_frame, text="Select Date", command=manual_date_change)
+    select_button.grid(row=0, column=2)
+
+    num_of_infected_frame = tk.Frame(root)
+    num_of_infected_frame.pack(padx=10, pady=10)
+
+    num_of_infected_label = tk.Label(num_of_infected_frame, text=f"Number of Infected Nodes at Current Time: {len(cascade.get_nodes_in_state_at_time(min_date.strftime("%Y-%m-%d"), SIModel.INFECTED))}")
+    num_of_infected_label.grid(row=0, column=0)
+
+    nodes_count_frame = tk.Frame(root)
+    nodes_count_frame.pack(padx=10, pady=10)
+
+    nodes_count_label = tk.Label(nodes_count_frame, text=f"Nodes: Visualized: {len(cascade.get_nodes_in_state_at_time(min_date.strftime("%Y-%m-%d"), SIModel.INFECTED)) + len(cascade.get_nodes_in_state_at_time(min_date.strftime("%Y-%m-%d"), SIModel.SUSCEPTIBLE))}")
+    nodes_count_label.grid(row=0, column=0)
+
+    button_frame = tk.Frame(root)
+    button_frame.pack(pady=10)
+
+    total_infection_label = tk.Label(root, text=f"Total Infection Events: {len(cascade.get_infection_events())}")
+    total_infection_label.pack(padx=10, pady=10)
+
+
+    slider = ttk.Scale(button_frame, from_=0, to=(max_date - min_date).days, orient="horizontal", command=slider_changed, length=600)
+    slider.pack(side=tk.LEFT)
+
+    label_error = tk.Label(root, text="", fg="red")
+    label_error.pack()
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    root.title("CSV File Explorer")
+    root.wm_state('zoomed')  # Maximize the window
+
+    criteria_label = tk.Label(root, text="Infection Criteria:")
+    criteria_label.pack(padx=10, pady=10, side='left')
+
+    criteria_entry = tk.Entry(root)
+    criteria_entry.pack(padx=10, pady=10,side='left')
+
+    nodes_label = tk.Label(root, text="Number of Nodes:")
+    nodes_label.pack(padx=10, pady=10, side='left')
+
+    nodes_entry = tk.Entry(root)
+    nodes_entry.pack(padx=10, pady=10, side='left')
+
+    button = tk.Button(root, text="Open CSV File", command=lambda: open_file(root))
+    button.pack(padx=10, pady=10, side='left')
+
+    close_button = tk.Button(root, text="Close", command=root.quit)
+    close_button.place(relx=1.0, rely=0.0, anchor="ne")  # Position in the top-right corner
+
+
+    root.mainloop()
