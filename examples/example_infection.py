@@ -53,7 +53,7 @@ while len(infected) < len(people):
     for person in infected:
         neighbors = graph.neighbors(person)
         for neighbor in neighbors:
-            if neighbor not in infected and random.random() < 0.5:  # 50% chance of infection
+            if neighbor not in infected and random.random() < 0.3:  # 30% chance of infection
                 newly_infected.add(neighbor.get_id())
                 print(f"{neighbor.get_id()} got infected from {person}")
 
@@ -69,7 +69,7 @@ class ExampleInfectionPlugin(CascadeConstructor):
 def print_currently_infected_at_time(cascade, time):
     nodes_in_state = cascade.get_nodes_in_state_at_time(time, SIModel.INFECTED)
     print("Currently infected nodes:{}, at time:{}".format([node.get_id() for node in nodes_in_state], time))
-    cascade.create_matplotlib_graph(slider=True, time=0)
+    cascade.create_matplotlib_graph(slider=True, time=0, node_size=1000)
 
 cascade = ExampleInfectionPlugin.create_cascade(graph, infection_events)
 print_currently_infected_at_time(cascade, 0)
